@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agentic Workflow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        glass: "rgba(255, 255, 255, 0.1)",
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        .step-active {
+            border-color: #4ade80;
+            color: #4ade80;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+        }
+        .step-completed {
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+        
+        /* Loading Banana Animation */
+        .banana-loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #fbd38d;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- Header -->
+    <header class="mb-8 text-center">
+        <h1 class="text-4xl font-bold tracking-tighter mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 transform hover:scale-105 transition-transform duration-300">
+            Agentic Image Workflow
+        </h1>
+        <p class="text-gray-400 text-sm">Powered by Nano Banana</p>
+    </header>
+
+    <!-- Workflow Progress -->
+    <div class="w-full max-w-4xl mb-10">
+        <div class="flex justify-between items-center relative">
+            <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-700 -z-10 rounded"></div>
+            
+            <div id="step-1" class="step-blob w-10 h-10 rounded-full bg-gray-900 border-2 border-gray-600 flex items-center justify-center font-bold transition-all duration-300">1</div>
+            <div id="step-2" class="step-blob w-10 h-10 rounded-full bg-gray-900 border-2 border-gray-600 flex items-center justify-center font-bold transition-all duration-300">2</div>
+            <div id="step-3" class="step-blob w-10 h-10 rounded-full bg-gray-900 border-2 border-gray-600 flex items-center justify-center font-bold transition-all duration-300">3</div>
+            <div id="step-4" class="step-blob w-10 h-10 rounded-full bg-gray-900 border-2 border-gray-600 flex items-center justify-center font-bold transition-all duration-300">4</div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-400 mt-2 px-1">
+            <span>Reference</span>
+            <span>Setup</span>
+            <span>Generate</span>
+            <span>Evaluate</span>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-5xl">
+        <div id="app-container" class="glass-panel p-8 min-h-[500px] flex flex-col items-center justify-center relative shadow-2xl">
+            
+            <!-- Phase 1: Reference Display -->
+            <div id="view-phase-1" class="hidden w-full text-center">
+                <h2 class="text-2xl mb-4 font-light">Phase 1: Fetching Reference...</h2>
+                <div class="animate-pulse w-64 h-64 bg-gray-700 rounded mx-auto mb-4"></div>
+            </div>
+
+            <!-- Phase 2: Uploads -->
+            <div id="view-phase-2" class="hidden w-full">
+                <h2 class="text-2xl mb-6 text-center font-light">Phase 2: Configuration</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Background Upload -->
+                    <div class="glass-panel p-6 text-center hover:bg-white/5 transition-colors cursor-pointer group" onclick="document.getElementById('bg-input').click()">
+                        <input type="file" id="bg-input" class="hidden" accept="image/*" onchange="handleFileSelect(this, 'bg-preview')">
+                        <div id="bg-preview" class="w-full h-48 border-2 border-dashed border-gray-500 rounded flex items-center justify-center group-hover:border-blue-400 transition-colors">
+                            <span class="text-gray-400">Upload Background Template</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Angle Upload -->
+                    <div class="glass-panel p-6 text-center hover:bg-white/5 transition-colors cursor-pointer group" onclick="document.getElementById('angle-input').click()">
+                        <input type="file" id="angle-input" class="hidden" accept="image/*" onchange="handleFileSelect(this, 'angle-preview')">
+                        <div id="angle-preview" class="w-full h-48 border-2 border-dashed border-gray-500 rounded flex items-center justify-center group-hover:border-blue-400 transition-colors">
+                            <span class="text-gray-400">Upload Angle Reference</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-8">
+                    <button onclick="submitUploads()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold shadow-lg shadow-blue-500/30 transition-all hover:scale-105">
+                        Start Generation
+                    </button>
+                    <div id="upload-status" class="mt-2 text-sm text-gray-400"></div>
+                </div>
+            </div>
+
+            <!-- Phase 3: Generation -->
+            <div id="view-phase-3" class="hidden text-center">
+                <div class="banana-loader mx-auto mb-6"></div>
+                <h2 class="text-2xl font-light animate-pulse">Designing Nano Banana...</h2>
+                <p class="text-gray-400 mt-2">Putting pixels together with AI</p>
+            </div>
+
+            <!-- Phase 4: Evaluation -->
+            <div id="view-phase-4" class="hidden w-full flex flex-col items-center">
+                <h2 class="text-2xl mb-4 font-light">Phase 4: Evaluation</h2>
+                <img id="generated-result" src="" class="rounded-lg shadow-2xl mb-6 max-h-[500px] border border-gray-700" alt="Generated Result">
+                
+                <div class="w-full max-w-xl bg-gray-900/50 p-6 rounded-lg">
+                    <label class="block text-sm text-gray-400 mb-2">Refinement Instructions (if rejecting)</label>
+                    <textarea id="feedback-text" class="w-full bg-gray-800 border-none rounded p-3 text-white focus:ring-2 focus:ring-blue-500 mb-4" rows="3" placeholder="e.g. Make it brighter, change the angle..."></textarea>
+                    
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="sendFeedback('reject')" class="px-6 py-2 bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-600/50 rounded transition-all">
+                            Refine & Regenerate
+                        </button>
+                        <button onclick="sendFeedback('approve')" class="px-6 py-2 bg-green-500 hover:bg-green-400 text-white font-bold rounded shadow-lg shadow-green-500/20 transition-all transform hover:scale-105">
+                            Approve Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase 6: Success -->
+            <div id="view-phase-6" class="hidden text-center">
+                <div class="text-6xl mb-4">🎉</div>
+                <h2 class="text-3xl font-bold text-white mb-2">Workflow Complete!</h2>
+                <p class="text-gray-400 mb-6">The image has been approved.</p>
+                <button onclick="resetWorkflow()" class="text-blue-400 hover:text-blue-300 underline">Start New Workflow</button>
+            </div>
+
+            <!-- S3 Reference Sidebar (Floating) -->
+            <div id="ref-sidebar" class="absolute top-4 right-4 w-32 hidden opacity-0 transition-opacity duration-1000">
+                <p class="text-xs text-center text-gray-500 mb-1">Source Ref</p>
+                <img id="s3-ref-img" src="" class="w-full rounded border border-gray-600 opacity-60 hover:opacity-100 transition-opacity" alt="Ref">
+            </div>
+
+        </div>
+    </main>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
