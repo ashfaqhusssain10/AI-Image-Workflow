@@ -134,6 +134,9 @@ class GeneratorService:
                         generated_filename = f"gen_{int(time.time())}.jpg"
                         output_path = os.path.join("static", "generated", generated_filename)
                         
+                        # Ensure the directory exists before saving
+                        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                        
                         img = Image.open(BytesIO(image_bytes))
                         img.save(output_path)
                         return f"/static/generated/{generated_filename}"
